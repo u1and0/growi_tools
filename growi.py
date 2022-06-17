@@ -14,7 +14,7 @@ VERSION = "v1.0.0"
 class Page:
     """GrowiへのAPIアクセス"""
     _access_token = os.environ["GROWI_ACCESS_TOKEN"]  # if unset raise KeyError
-    origin = os.environ.get("GROWI_URL", "http://localhost:3000/_api")
+    origin = os.environ.get("GROWI_URL", "http://localhost:3000")
 
     def __init__(self, path, **kwargs):
         """GrowiへのAPIアクセス
@@ -24,10 +24,10 @@ class Page:
 
         >>> import os
         >>> os.environ["GROWI_ACCESS_TOKEN"] = "****"
-        >>> os.environ["GROWI_URL"] = "http://192.168.***.***:3000/_api"
+        >>> os.environ["GROWI_URL"] = "http://192.168.***.***:3000"
 
         `GROWI_ACCESS_TOKEN`を設定しない場合、KeyErrorを吐いてプログラムは終了する。
-        `GROWI_URL`を設定しない場合、"http://localhost:3000/_api"が割り当てられる。
+        `GROWI_URL`を設定しない場合、"http://localhost:3000"が割り当てられる。
 
         # Example
         page = Page("/user/myname")
@@ -66,7 +66,7 @@ class Page:
             "access_token": Page._access_token,
         }
         data.update(**kwargs)
-        res = requests.post(Page.origin + "/v3/pages", data)
+        res = requests.post(Page.origin + "/_api/v3/pages", data)
         return res.json()
 
     def _update(self, body, **kwargs):
@@ -80,7 +80,7 @@ class Page:
             "access_token": Page._access_token,
         }
         data.update(**kwargs)
-        res = requests.post(Page.origin + "/pages.update", data)
+        res = requests.post(Page.origin + "/_api/pages.update", data)
         return res.json()
 
     def post(self, body, **kwargs):
@@ -90,10 +90,8 @@ class Page:
         で引数bodyの内容を上書き/書込みする。
         """
         if self.exist:
-            json_resp = self._update(body, **kwargs)
-        else:
-            json_resp = self._create(body, **kwargs)
-        return json_resp
+            return self._update(body, **kwargs)
+        return self._create(body, **kwargs)
 
     def get(self, prop_access=False, **kwargs):
         """ パスのページをJSONで取得する
@@ -110,7 +108,7 @@ class Page:
             "access_token": Page._access_token,
         }
         params.update(**kwargs)
-        res = requests.get(Page.origin + "/v3/page", params)
+        res = requests.get(Page.origin + "/_api/v3/page", params)
         # Simplanamespaceをobject_hookしてやることで
         # json()で返ってきた辞書を再帰的にnamespace化する。
         # すなわちドットプロパティアクセスができる。
@@ -125,7 +123,7 @@ class Page:
             "access_token": Page._access_token,
         }
         params.update(**kwargs)
-        res = requests.get(Page.origin + "/pages.list", params)
+        res = requests.get(Page.origin + "/_api/pages.list", params)
         if prop_access:
             return res.json(object_hook=lambda d: SimpleNamespace(**d))
         return res.json()
@@ -133,7 +131,7 @@ class Page:
 
 class Revisions:
     """更新情報を取得"""
-    url = Page.origin + "/v3/revisions/list"
+    url = Page.origin + "/_api/v3/revisions/list"
 
     # page=0のクエリーパラメータの意味が分かっていない
     def __init__(self, id, page=0, **kwargs):
@@ -161,7 +159,7 @@ class Revisions:
 
     def authors(self):
         """編集者id(重複なし)を返す"""
-        return {d.author._id for d in self.docs}
+        return {d.author._id if d.author else "" for d in self.docs}
 
 
 if __name__ == "__main__":
