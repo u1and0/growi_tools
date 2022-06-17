@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Growi記事ランキング投稿"""
 import re
+from typing import Iterator
 from itertools import count
 from operator import attrgetter
 from collections import UserList, namedtuple
@@ -33,12 +34,11 @@ class Ranks(UserList):
 
     def append_ranking(self) -> list[str]:
         """ランキングリストをGrowiマークダウン形式に書き換える"""
-        body = [
+        return [
             f"[{rank.path}]({Page.origin}/{rank.id}) :heart:{rank.liker} \
-:footprints:{rank.seen} :left_speech_bubble:{rank.commentCount} :pencil2:{rank.authors}"
-            for rank in self.data
+:footprints:{rank.seen} :left_speech_bubble:{rank.commentCount} \
+:pencil2:{rank.authors}" for rank in self.data
         ]
-        return body
 
     def make_page(self, title: str, key: str, top: int, ids: list[str]) -> str:
         """タイトル行を追加し、keyでソートしたtop(数字)のリストを
@@ -50,31 +50,29 @@ class Ranks(UserList):
         arrows = ("" for _ in range(top))
         if ids:
             after_ids: list[str] = [i.id for i in self[:top]]
-            arrows: list[str] = Ranks.shift(ids, after_ids)
+            arrows: Iterator = Ranks.shift(ids, after_ids)
         body: str = title + "\n".join(
             f"{i}. {arrow} {elem}"
             for i, arrow, elem in zip(count(1), arrows, after_ranks))
         return body
 
     @staticmethod
-    def shift(before: list, after: list) -> list[str]:
+    def shift(before: list, after: list) -> Iterator:
         """ afterのインデックスbeforeに比べて上がってたら上
         下がってたら下、横いだったら横の記号をリストで返す
         """
         before_ranks: list[Union[int, float]] = \
             (after.index(i) if i in after else float("inf") for i in before)
-        li = []
         for after_rank, before_rank in enumerate(before_ranks):
             sub: int = before_rank - after_rank
             if sub == float("inf"):
-                li.append(":new:")
+                yield ":new:"
             elif sub > 0:
-                li.append(":arrow_upper_right:")
+                yield ":arrow_upper_right:"
             elif sub < 0:
-                li.append(":arrow_lower_right:")
+                yield ":arrow_lower_right:"
             else:
-                li.append(":arrow_right:")
-        return li
+                yield ":arrow_right:"
 
     @staticmethod
     def read_ids(paragraph: str) -> list[str]:
