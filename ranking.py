@@ -119,11 +119,8 @@ if __name__ == "__main__":
         page_body += "\n".join(ranking_md)
 
     # Post page
-    # res = rank_page.post(page_body)
-    # print(res)
+    res = rank_page.post(page_body)
+    print(res)
 
     # Just print test
-    print(page_body)
-
-    # import doctest
-    # doctest.testmod(verbose=True)
+    # print(page_body)
