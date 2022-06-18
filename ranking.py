@@ -2,24 +2,21 @@
 """Growi記事ランキング投稿"""
 import re
 from typing import Iterator
-from itertools import count
 from operator import attrgetter
 from collections import UserList, namedtuple
 from typing import Union
 from more_itertools import chunked
 from growi import Page, Revisions
 
-Rank = namedtuple(
-    "Rank",
-    [
-        # 要素の最後に , を付け忘れがち
-        "path",  # str
-        "id",  # str
-        "liker",  # int
-        "seen",  # int
-        "commentCount",  # int
-        "authors",  # int
-    ])
+fields = {
+    "path": "",
+    "id": "",
+    "liker": 0,
+    "seen": 0,
+    "commentCount": 0,
+    "authors": 0
+}
+Rank = namedtuple("Rank", fields.keys(), defaults=fields.values())
 
 
 class Ranks(UserList):
@@ -40,24 +37,24 @@ class Ranks(UserList):
 :pencil2:{rank.authors}" for rank in self.data
         ]
 
-    def make_page(self, title: str, key: str, top: int, ids: list[str]) -> str:
-        """タイトル行を追加し、keyでソートしたtop(数字)のリストを
+    def make_page(self, top: int, ids: list[str]) -> str:
+        """top(数字)のリストを
         ランキング形式でmarkdown形式の文字列に変換する
         """
-        self.sort(key)
         after_ranks: list[str] = self[:top].append_ranking()
-        # 初期値、idsがないとき==初めてランキングを作るとき
+        # arrows初期値、idsがないとき==初めてランキングを作るとき
         arrows = ("" for _ in range(top))
         if ids:
             after_ids: list[str] = [i.id for i in self[:top]]
-            arrows: Iterator = Ranks.shift(ids, after_ids)
-        body: str = title + "\n".join(
+            arrows: Iterator[str] = Ranks.shift(ids, after_ids)
+        body = [
             f"{i}. {arrow} {elem}"
-            for i, arrow, elem in zip(count(1), arrows, after_ranks))
+            for i, arrow, elem in zip(range(1, 1 + top), arrows, after_ranks)
+        ]
         return body
 
     @staticmethod
-    def shift(before: list, after: list) -> Iterator:
+    def shift(before: list, after: list) -> Iterator[str]:
         """ afterのインデックスbeforeに比べて上がってたら上
         下がってたら下、横いだったら横の記号をリストで返す
         """
@@ -112,11 +109,13 @@ if __name__ == "__main__":
     )
     page_body = ""
     for title, key in ranking_element:
+        ranks.sort(key)
         try:
             chunk = next(before_ids_chunk)
         except (StopIteration, NameError):
             chunk = None
-        page_body += ranks.make_page(title, key, top, chunk)
+        ranking_md = ranks.make_page(top, chunk)
+        body: str = title + "\n".join(ranking_md)
 
     # Post page
     # res = rank_page.post(page_body)
