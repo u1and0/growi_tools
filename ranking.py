@@ -102,10 +102,10 @@ if __name__ == "__main__":
         before_ids_chunk = chunked(before_ids, top)
     ranking_element = (
         (f"# :heart:ライクが多いランキングトップ{top}\n\n", "liker"),
-        (f"\n\n # :footprints:足跡が多いランキングトップ{top}\n\n", "seen"),
-        (f"\n\n # :left_speech_bubble:コメントが多いランキングトップ{top}\n\n",
+        (f"\n\n# :footprints:足跡が多いランキングトップ{top}\n\n", "seen"),
+        (f"\n\n# :left_speech_bubble:コメントが多いランキングトップ{top}\n\n",
          "commentCount"),
-        (f"\n\n # :pencil2:編集者が多いランキングトップ{top}\n\n", "authors"),
+        (f"\n\n# :pencil2:編集者が多いランキングトップ{top}\n\n", "authors"),
     )
     page_body = ""
     for title, key in ranking_element:
@@ -115,7 +115,8 @@ if __name__ == "__main__":
         except (StopIteration, NameError):
             chunk = None
         ranking_md = ranks.make_page(top, chunk)
-        body: str = title + "\n".join(ranking_md)
+        page_body += title
+        page_body += "\n".join(ranking_md)
 
     # Post page
     # res = rank_page.post(page_body)

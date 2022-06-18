@@ -37,7 +37,7 @@ class TestRanks_make_page(unittest.TestCase):
         rank3 = ranking.Rank(path="/rank3", id="3333", liker=2)
         ranks = ranking.Ranks([rank1, rank2, rank3])
         ids = ["1111", "2222", "3333"]
-        top = len(ids)
+        top = 3
         ranks.sort("liker")
         actual = ranks.make_page(top, ids)
         expected = [
@@ -47,6 +47,29 @@ class TestRanks_make_page(unittest.TestCase):
 :heart:1 :footprints:0 :left_speech_bubble:0 :pencil2:0",
             "3. :arrow_lower_right: [/rank1](https://demo.growi.org/1111) \
 :heart:0 :footprints:0 :left_speech_bubble:0 :pencil2:0",
+        ]
+        self.assertEqual(actual, expected)
+
+
+class TestRanks_make_page_newcase(unittest.TestCase):
+    """Ranks.make_page() test"""
+    def test_rank(self):
+        rank1 = ranking.Rank(path="/rank1", id="1111", liker=0)
+        rank2 = ranking.Rank(path="/rank2", id="2222", liker=1)
+        rank3 = ranking.Rank(path="/rank3", id="3333", liker=2)
+        rank4 = ranking.Rank(path="/rank4", id="4444", liker=10)
+        ranks = ranking.Ranks([rank1, rank2, rank3, rank4])
+        ids = ["1111", "2222", "3333"]
+        top = 3
+        ranks.sort("liker")
+        actual = ranks.make_page(top, ids)
+        expected = [
+            "1. :new: [/rank4](https://demo.growi.org/4444) \
+:heart:10 :footprints:0 :left_speech_bubble:0 :pencil2:0",
+            "2. :arrow_upper_right: [/rank3](https://demo.growi.org/3333) \
+:heart:2 :footprints:0 :left_speech_bubble:0 :pencil2:0",
+            "3. :arrow_lower_right: [/rank2](https://demo.growi.org/2222) \
+:heart:1 :footprints:0 :left_speech_bubble:0 :pencil2:0",
         ]
         self.assertEqual(actual, expected)
 
