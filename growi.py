@@ -165,12 +165,12 @@ class Revisions:
 if __name__ == "__main__":
     if "-h" in sys.argv or "--help" in sys.argv:
         print(__doc__)
-        exit(0)
+        sys.exit(0)
     if len(sys.argv) < 2:
         print(__doc__)
-        exit(1)
+        sys.exit(1)
     if "-v" in sys.argv or "--version" in sys.argv:
         print(f"growi.py version: {VERSION}")
-        exit(0)
+        sys.exit(0)
     page = Page(sys.argv[-2])
     print(page.post(sys.argv[-1]))
