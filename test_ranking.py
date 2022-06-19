@@ -29,8 +29,8 @@ class TestRanks_shift(unittest.TestCase):
         ])
 
 
-class TestRanks_make_page(unittest.TestCase):
-    """Ranks.make_page() test"""
+class TestRanks_order(unittest.TestCase):
+    """Ranks.order() test"""
     def test_rank(self):
         rank1 = ranking.Rank(path="/rank1", id="1111", liker=0)
         rank2 = ranking.Rank(path="/rank2", id="2222", liker=1)
@@ -39,7 +39,7 @@ class TestRanks_make_page(unittest.TestCase):
         ids = ["1111", "2222", "3333"]
         top = 3
         ranks.sort("liker")
-        actual = ranks.make_page(top, ids)
+        actual = ranks.order(top, ids)
         expected = [
             "1. :arrow_upper_right: [/rank3](https://demo.growi.org/3333) \
 :heart:2 :footprints:0 :left_speech_bubble:0 :pencil2:0",
@@ -51,8 +51,8 @@ class TestRanks_make_page(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
-class TestRanks_make_page_newcase(unittest.TestCase):
-    """Ranks.make_page() test"""
+class TestRanks_order_newcase(unittest.TestCase):
+    """Ranks.order() test"""
     def test_rank(self):
         rank1 = ranking.Rank(path="/rank1", id="1111", liker=0)
         rank2 = ranking.Rank(path="/rank2", id="2222", liker=1)
@@ -62,7 +62,7 @@ class TestRanks_make_page_newcase(unittest.TestCase):
         ids = ["1111", "2222", "3333"]
         top = 3
         ranks.sort("liker")
-        actual = ranks.make_page(top, ids)
+        actual = ranks.order(top, ids)
         expected = [
             "1. :new: [/rank4](https://demo.growi.org/4444) \
 :heart:10 :footprints:0 :left_speech_bubble:0 :pencil2:0",

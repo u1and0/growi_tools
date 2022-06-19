@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
-"""Growi記事ランキング投稿"""
+"""Growi記事ランキング投稿
+usage:
+    $ python ranking.py DST [SRC] [TOP]
+
+    # ランキングを表示するページパスを指定
+    $ python ranking.py /Ranking
+    # ランキングを表示するページパスとランキング集計元の親ページパスを指定
+    $ python ranking.py /Ranking /From/Root
+    # ランキングを表示するページパスとランキング集計元の親ページパスとトップ5の集計を指定
+    $ python ranking.py /Ranking /From/Root 5
+"""
 import re
+import argparse
 from typing import Iterator
 from operator import attrgetter
 from collections import UserList, namedtuple
@@ -29,19 +40,19 @@ class Ranks(UserList):
         """ランキングのリストに対してkeyでソートをかける"""
         return self.data.sort(key=attrgetter(key), reverse=reverse)
 
-    def append_ranking(self) -> list[str]:
-        """ランキングリストをGrowiマークダウン形式に書き換える"""
+    def convert(self) -> list[str]:
+        """ランキングリストをGrowiマークダウン形式のリストに変換する"""
         return [
             f"[{rank.path}]({Page.origin}/{rank.id}) :heart:{rank.liker} \
 :footprints:{rank.seen} :left_speech_bubble:{rank.commentCount} \
 :pencil2:{rank.authors}" for rank in self.data
         ]
 
-    def make_page(self, top: int, ids: list[str]) -> str:
-        """top(数字)のリストを
-        ランキング形式でmarkdown形式の文字列に変換する
+    def order(self, top: int, ids: list[str]) -> list[str]:
+        """top(数字)のリストを上位topの数でランキングづけする。
+        過去のランクidsがあれば過去ランクとの比較を行う。
         """
-        after_ranks: list[str] = self[:top].append_ranking()
+        after_ranks: list[str] = self[:top].convert()
         # arrows初期値、idsがないとき==初めてランキングを作るとき
         arrows = ("" for _ in range(top))
         if ids:
@@ -55,8 +66,8 @@ class Ranks(UserList):
 
     @staticmethod
     def shift(before: list, after: list) -> Iterator[str]:
-        """ afterのインデックスbeforeに比べて上がってたら上
-        下がってたら下、横いだったら横の記号をリストで返す
+        """ afterのインデックスbeforeに比べて上がってたら上、
+        下がってたら下、横ばいだったら横の記号をリストで返す。
         """
         before_ranks: list[Union[int, float]] = \
             (after.index(i) if i in after else float("inf") for i in before)
@@ -83,8 +94,6 @@ def init(path: str = "/") -> Ranks:
     pages = page.list(prop_access=True, limit=1000).pages
     rank_list = Ranks()
     for page in pages:
-        if page.path == "/":  # rootは編集者なしでエラーなので除外
-            continue  # 最初必ず見る場所なので、足跡が必ず1位になるので除外
         revisions = Revisions(page._id, limit=100)
         rank = Rank(page.path, page._id, len(page.liker), len(page.seenUsers),
                     page.commentCount, len(revisions.authors()))
@@ -92,11 +101,13 @@ def init(path: str = "/") -> Ranks:
     return rank_list
 
 
-if __name__ == "__main__":
-    ranks: Ranks = init("/お試し")
-    # Make page
-    top = 10
-    rank_page = Page("/お試し/Ranking")
+def main(dst: str, src: str = "/", top=10, dryrun=False):
+    """Growiページパスsrcからランキング情報を収集し、
+    Growiページパスdstへランキングを記したマークダウン形式の文字列を投稿する。
+    第2引数以降省略でき、デフォルトで"/"からランキングを作成する。
+    """
+    ranks: Ranks = init(src)
+    rank_page = Page(dst)
     if rank_page.exist:
         before_ids = Ranks.read_ids(rank_page.body)
         before_ids_chunk = chunked(before_ids, top)
@@ -114,13 +125,34 @@ if __name__ == "__main__":
             chunk = next(before_ids_chunk)
         except (StopIteration, NameError):
             chunk = None
-        ranking_md = ranks.make_page(top, chunk)
+        ranking_md = ranks.order(top, chunk)
         page_body += title
         page_body += "\n".join(ranking_md)
 
+    if dryrun:
+        # Just print test
+        print(page_body)
+        return
     # Post page
     res = rank_page.post(page_body)
     print(res)
 
-    # Just print test
-    # print(page_body)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("dst", help="Growiのランキング表示先ページパス")
+    parser.add_argument("src",
+                        nargs="?",
+                        default="/",
+                        help="Growiのランキング集計元ページパス")
+    parser.add_argument("top",
+                        nargs="?",
+                        type=int,
+                        default=10,
+                        help="ランキング上位数")
+    parser.add_argument("-n",
+                        "--dryrun",
+                        action="store_true",
+                        help="標準出力へマークダウンをprintするのみで、記事投稿しない。")
+    args = parser.parse_args()
+    main(args.dst, args.src, args.top, dryrun=args.dryrun)
