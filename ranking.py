@@ -44,7 +44,7 @@ class Ranks(UserList):
         """ランキングリストをGrowiマークダウン形式のリストに変換する"""
         return [
             f"[{rank.path}]({Page.origin}/{rank.id}) :heart:{rank.liker} \
-:footprints:{rank.seen} :left_speech_bubble:{rank.commentCount} \
+:footprints:{rank.seen} :speech_balloon:{rank.commentCount} \
 :pencil2:{rank.authors}" for rank in self.data
         ]
 
@@ -114,8 +114,7 @@ def main(dst: str, src: str = "/", top=10, dryrun=False):
     ranking_element = (
         (f"# :heart:ライクが多いランキングトップ{top}\n\n", "liker"),
         (f"\n\n# :footprints:足跡が多いランキングトップ{top}\n\n", "seen"),
-        (f"\n\n# :left_speech_bubble:コメントが多いランキングトップ{top}\n\n",
-         "commentCount"),
+        (f"\n\n# :speech_balloon:コメントが多いランキングトップ{top}\n\n", "commentCount"),
         (f"\n\n# :pencil2:編集者が多いランキングトップ{top}\n\n", "authors"),
     )
     page_body = ""
