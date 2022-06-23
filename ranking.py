@@ -12,10 +12,10 @@ usage:
 """
 import re
 import argparse
-from typing import Iterator
+from typing import Iterator, Union
 from operator import attrgetter
 from collections import UserList, namedtuple
-from typing import Union
+from itertools import count
 from more_itertools import chunked
 from growi import Page, Revisions
 
@@ -60,7 +60,7 @@ class Ranks(UserList):
             arrows: Iterator[str] = Ranks.shift(ids, after_ids)
         body = [
             f"{i}. {arrow} {elem}"
-            for i, arrow, elem in zip(range(1, 1 + top), arrows, after_ranks)
+            for i, arrow, elem in zip(count(1), arrows, after_ranks)
         ]
         return body
 
