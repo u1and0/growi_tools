@@ -166,10 +166,15 @@ SRC, TOPは省略可能です。
 ```shell-session
 usage: ranking.py [-h] [-n] dst [src] [top]
 
-Growi記事ランキング投稿 usage: $ python ranking.py DST [SRC] [TOP] # ランキングを表示するページパスを指定
-$ python ranking.py /Ranking # ランキングを表示するページパスとランキング集計元の親ページパスを指定 $ python
-ranking.py /Ranking /From/Root # ランキングを表示するページパスとランキング集計元の親ページパスとトップ5の集計を指定 $
-python ranking.py /Ranking /From/Root 5
+Growi記事ランキング投稿
+usage: $ python ranking.py DST [SRC] [TOP]
+
+# ランキングを表示するページパスを指定
+$ python ranking.py /Ranking
+# ランキングを表示するページパスとランキング集計元の親ページパスを指定
+$ python ranking.py /Ranking /From/Root
+# ランキングを表示するページパスとランキング集計元の親ページパスとトップ5の集計を指定
+$ python ranking.py /Ranking /From/Root 5
 
 positional arguments:
   dst           Growiのランキング表示先ページパス
