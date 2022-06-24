@@ -1,4 +1,3 @@
-
 # 完成品イメージ
 
 ## 完成品スクショ
@@ -161,3 +160,14 @@ SRC, TOPは省略可能です。
 
 最後にページの内容(`page_body`)を`DST`で指定したページへ投稿し、結果のJSONを`print()`します。
 
+
+# 使い方
+
+```shell-session
+$ python ranking.py DST [SRC] [TOP]
+```
+
+DSTを"/Sidebar"にして常に左側のサイドバーにランキングが表示されるようにしました。(スクショなし)
+SRCはデフォルトの"/"、TOPはデフォルトの"10"ですので、指定していません。
+Dockerコンテナ上で`cron`を使って、毎日定期的にGrowiのランキング集計、投稿を行っています。
+[Dockerfile](https://github.com/u1and0/growi_tools/blob/master/Dockerfile)
