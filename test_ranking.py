@@ -1,5 +1,4 @@
 """ranking.py test"""
-import os
 import unittest
 
 
@@ -76,7 +75,9 @@ class TestRanks_order_newcase(unittest.TestCase):
 
 if __name__ == "__main__":
     # Set env for test
-    os.environ["GROWI_ACCESS_TOKEN"] = ""
+    import os
+    os.environ["GROWI_ACCESS_TOKEN"] = input(
+        "GROWI_ACCESS_TOKEN for demo.growi.org: ")
     os.environ["GROWI_URL"] = "https://demo.growi.org"
     import ranking
     unittest.main()
