@@ -58,7 +58,7 @@ class Page:
             self.revision_id = self._json.revision._id
             self.body = self._json.revision.body
 
-    def _create(self, body, **kwargs):
+    def create(self, body, **kwargs):
         """パスの内容へbodyを書き込む"""
         data = {
             "body": body,
@@ -69,10 +69,10 @@ class Page:
         res = requests.post(Page.origin + "/_api/v3/pages", data)
         return res.json()
 
-    def _update(self, body, **kwargs):
+    def update(self, body, **kwargs):
         """パスの内容をbodyで更新する"""
         if body == self.body:
-            return json.loads('{"error": "更新前後の内容が同じですので、更新しませんでした。"}')
+            return json.loads('{"error": "更新前後の内容が同じなので、更新しませんでした。"}')
         data = {
             "page_id": self.id,
             "revision_id": self.revision_id,
@@ -85,13 +85,13 @@ class Page:
 
     def post(self, body, **kwargs):
         """指定パスに
-        ページが存在すれば_update(),
-        ページが存在しなければ_create()
+        ページが存在すればupdate(),
+        ページが存在しなければcreate()
         で引数bodyの内容を上書き/書込みする。
         """
         if self.exist:
-            return self._update(body, **kwargs)
-        return self._create(body, **kwargs)
+            return self.update(body, **kwargs)
+        return self.create(body, **kwargs)
 
     def get(self, prop_access=False, **kwargs):
         """ パスのページをJSONで取得する
