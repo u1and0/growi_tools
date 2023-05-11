@@ -90,8 +90,10 @@ class Page:
         で引数bodyの内容を上書き/書込みする。
         """
         if self.exist:
-            return self.update(body, **kwargs)
-        return self.create(body, **kwargs)
+            json_resp = self.update(body, **kwargs)
+        else:
+            json_resp = self.create(body, **kwargs)
+        return json_resp
 
     def get(self, prop_access=False, **kwargs):
         """ パスのページをJSONで取得する
