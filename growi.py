@@ -119,7 +119,24 @@ class Page:
         return res.json()
 
     def list(self, prop_access=False, **kwargs):
-        """ パス配下の情報をJSONで取得する """
+        """ パス配下の情報をJSONで取得する
+        prop_access=Trueにすると、ドッドプロパティアクセスができるので、
+        ipython上でプロパティアクセスしやすい
+
+        >>> page = Page("/")
+
+        # 101までページの情報を取得
+        >>> tree = page.list(prop_access=True, limit=100)
+
+        # "/"配下の全てのページパス
+        >>> page_paths = [i.path for i in tree.pages]
+
+        # 最初のページの情報をdocに格納
+        >>> doc = Page(page_paths[0])
+
+        # /配下の全てのページのタイトルと内容の最初の50文字を辞書形式で取得
+        >>> {growi.Page(p).path:growi.Page(p).body[:50] for p in pages_path}
+        """
         params = {
             "path": self.path,
             "access_token": Page._access_token,
