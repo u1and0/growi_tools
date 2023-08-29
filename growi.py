@@ -179,7 +179,7 @@ class Revisions:
 
     def authors(self):
         """編集者id(重複なし)を返す"""
-        return {d.author._id if d.author else "" for d in self.docs}
+        return {d.author._id if d.author else "" for d in self.revisions}
 
 
 if __name__ == "__main__":
