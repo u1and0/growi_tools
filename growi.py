@@ -8,7 +8,7 @@ import json
 from types import SimpleNamespace
 import requests
 
-VERSION = "v1.0.0"
+VERSION = "v1.0.1"
 
 
 class Page:
@@ -161,8 +161,9 @@ class Revisions:
         self.page_id: str = id
         self.page: int = page
         self._json = self.get(1, **kwargs)
-        self.totalDocs: int = self._json.totalDocs
-        self.docs: list = self._json.docs
+        # Growi v6.1.12 へ移行したらtotalDocsとdocsの名称が変わった？
+        self.totalCount: int = self._json.totalCount
+        self.revisions: list = self._json.revisions
 
     def get(self, prop_access=False, **kwargs):
         params = {
