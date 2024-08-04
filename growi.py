@@ -66,7 +66,7 @@ class Page:
             "access_token": Page._access_token,
         }
         data.update(**kwargs)
-        res = requests.post(Page.origin + "/_api/v3/pages", data)
+        res = requests.post(Page.origin + "/_api/v3/page", data)
         return res.json()
 
     def update(self, body, **kwargs):
