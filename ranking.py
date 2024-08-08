@@ -91,7 +91,7 @@ class Ranks(UserList):
 def init(path: str = "/") -> Ranks:
     """Generate List of Rank"""
     page = Page(path)
-    pages = page.list(prop_access=True, limit=1000).pages
+    pages = page.list(prop_access=True, limit=10000).pages
     rank_list = Ranks()
     for page in pages:
         revisions = Revisions(page._id, limit=100)
@@ -107,10 +107,12 @@ def main(dst: str, src: str = "/", top=10, dryrun=False):
     第2引数以降省略でき、デフォルトで"/"からランキングを作成する。
     """
     ranks: Ranks = init(src)
-    rank_page = Page(dst)
-    if rank_page.exist:
-        before_ids = Ranks.read_ids(rank_page.body)
-        before_ids_chunk = chunked(before_ids, top)
+    # 過去のランキングページの読み込み
+    if not dryrun:
+        rank_page = Page(dst)
+        if rank_page.exist:
+            before_ids = Ranks.read_ids(rank_page.body)
+            before_ids_chunk = chunked(before_ids, top)
     ranking_element = (
         (f"# :heart:ライクが多いランキングトップ{top}\n\n", "liker"),
         (f"\n\n# :footprints:足跡が多いランキングトップ{top}\n\n", "seen"),
@@ -143,12 +145,12 @@ if __name__ == "__main__":
     parser.add_argument("src",
                         nargs="?",
                         default="/",
-                        help="Growiのランキング集計元ページパス")
+                        help="Growiのランキング集計元ページパス(default '/')")
     parser.add_argument("top",
                         nargs="?",
                         type=int,
                         default=10,
-                        help="ランキング上位数")
+                        help="ランキング上位数(default 10)")
     parser.add_argument("-n",
                         "--dryrun",
                         action="store_true",

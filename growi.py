@@ -6,6 +6,7 @@ import os
 import sys
 import json
 from types import SimpleNamespace
+from typing import Optional
 import requests
 
 VERSION = "v1.0.1"
@@ -41,6 +42,11 @@ class Page:
         """
         self.path = path
         self._json = self.get(1, **kwargs)
+        # 以降はデフォルト値
+        self.body: Optional[str] = None
+        self.exist: bool = False
+        self.id: Optional[str] = None
+        self.revision_id: Optional[str] = None
         # =>
         # {"page":
         # "id":...,
@@ -67,6 +73,8 @@ class Page:
         }
         data.update(**kwargs)
         res = requests.post(Page.origin + "/_api/v3/page", data)
+        res.raise_for_status()  # 200番台以外のステータスコードでraiseして以下は実行されない
+        self.body = body
         return res.json()
 
     def update(self, body, **kwargs):
@@ -74,13 +82,16 @@ class Page:
         if body == self.body:
             return json.loads('{"error": "更新前後の内容が同じなので、更新しませんでした。"}')
         data = {
-            "page_id": self.id,
-            "revision_id": self.revision_id,
+            "pageId": self.id,
+            "revisionId": self.revision_id,
             "body": body,
             "access_token": Page._access_token,
         }
         data.update(**kwargs)
-        res = requests.post(Page.origin + "/_api/pages.update", data)
+
+        res = requests.put(Page.origin + "/_api/v3/page", data)
+        res.raise_for_status()  # 200番台以外のステータスコードでraiseして以下は実行されない
+        self.body = body
         return res.json()
 
     def post(self, body, **kwargs):
@@ -90,10 +101,9 @@ class Page:
         で引数bodyの内容を上書き/書込みする。
         """
         if self.exist:
-            json_resp = self.update(body, **kwargs)
+            return self.update(body, **kwargs)
         else:
-            json_resp = self.create(body, **kwargs)
-        return json_resp
+            return self.create(body, **kwargs)
 
     def get(self, prop_access=False, **kwargs):
         """ パスのページをJSONで取得する
@@ -118,7 +128,7 @@ class Page:
             return res.json(object_hook=lambda d: SimpleNamespace(**d))
         return res.json()
 
-    def list(self, prop_access=False, **kwargs):
+    def list(self, prop_access=False, limit=1000, **kwargs):
         """ パス配下の情報をJSONで取得する
         prop_access=Trueにすると、ドッドプロパティアクセスができるので、
         ipython上でプロパティアクセスしやすい
@@ -138,8 +148,9 @@ class Page:
         >>> {growi.Page(p).path:growi.Page(p).body[:50] for p in pages_path}
         """
         params = {
-            "path": self.path,
+            "pagePath": self.path,
             "access_token": Page._access_token,
+            "limit": limit,
         }
         params.update(**kwargs)
         res = requests.get(Page.origin + "/_api/pages.list", params)
