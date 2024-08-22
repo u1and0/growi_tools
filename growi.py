@@ -83,8 +83,8 @@ class Page:
             return json.loads('{"error": "更新前後の内容が同じなので、更新しませんでした。"}')
         data = {
             "pageId": self.id,
-            "revisionId": self.revision_id,
             "body": body,
+            "revisionId": self.revision_id,
             "access_token": Page._access_token,
         }
         data.update(**kwargs)
@@ -153,7 +153,7 @@ class Page:
             "limit": limit,
         }
         params.update(**kwargs)
-        res = requests.get(Page.origin + "/_api/pages.list", params)
+        res = requests.get(Page.origin + "/_api/v3/page-listing", params)
         if prop_access:
             return res.json(object_hook=lambda d: SimpleNamespace(**d))
         return res.json()
